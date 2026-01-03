@@ -1,0 +1,40 @@
+{
+  "name": "js-playground",
+  "version": "1.0.0",
+  "description": "Examples created with Node.JS JavaScript client library for the integration with LinkedIn.",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node --trace-warnings server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kedarvijaykulkarni/js-playground.git"
+  },
+  "keywords": [
+    "LinkedIn",
+    "Kedar",
+    "Cohere",
+    "AI"
+  ],
+  "author": "Kedar",
+  "contributors": [
+    {
+      "name": "Kedar Vijay Kulkarni",
+      "url": "https://github.com/kedarvijaykulkarni"
+    }
+  ],
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kedarvijaykulkarni/js-playground/issues"
+  },
+  "homepage": "https://github.com/kedarvijaykulkarni/js-playground/tree/LinkedIn-Bot#readme",
+  "dependencies": {
+    "body-parser": "^2.2.1",
+    "cors": "^2.8.5",
+    "cron": "^4.4.0",
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1"
+  }
+}
