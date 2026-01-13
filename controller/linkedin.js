@@ -70,7 +70,7 @@ export async function getAnswer(question) {
 
               • Maximum length: 2635 characters total (including spaces and line breaks)\n
               • Do NOT exceed the limit under any condition\n
-              • No hashtags unless explicitly requested\n
+              • hashtags explicitly requested\n
               • No references to being an AI or following rules\n
               • Do not mention formatting or constraints in the output\n
               • Final output must be ready to paste directly into LinkedIn \n
