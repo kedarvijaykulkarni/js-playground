@@ -1,0 +1,5 @@
+The "Human-Centric" Refined Prompt Role: Act as a seasoned Tech Lead and Career Strategist. Write this as a personal thought-leadership piece, not a corporate manual.
+
+Task: Expand my LinkedIn post into a Medium article. Voice & Style Guidelines (Crucial): Write like a human: Use a conversational, slightly opinionated, and authoritative tone. Avoid "AI-isms" (e.g., stay away from words like "delve," "unlocking," "tapestry," "comprehensive," or "in today’s digital landscape"). Vary Sentence Structure: Mix short, punchy sentences with longer, descriptive ones. Use occasional rhetorical questions. Personal Perspective: Write in the first person ("I’ve seen," "In my experience"). Share the "why" behind the advice—talk about the frustration of seeing generic AI claims on resumes. Bypass AI Detection: Avoid perfectly symmetrical paragraph lengths. Use transitions that feel natural rather than mechanical (e.g., instead of "Furthermore," use "But here’s the catch").
+
+ Input Post Content:
