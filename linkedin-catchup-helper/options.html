@@ -1,0 +1,47 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Catch-up Helper Settings</title>
+    <link rel="stylesheet" href="options.css" />
+  </head>
+  <body>
+    <div class="wrap">
+      <h1>Settings</h1>
+
+      <label>
+        Max prepared per run
+        <input id="maxPerRun" type="number" min="1" max="50" />
+      </label>
+
+      <label>
+        Wait between actions (ms)
+        <input id="waitMs" type="number" min="300" max="10000" />
+      </label>
+
+      <label>
+        Birthday message
+        <textarea id="birthdayMessage" rows="3"></textarea>
+      </label>
+
+      <label>
+        Work anniversary template (use <code>{years}</code>)
+        <textarea id="workAnnivTemplate" rows="3"></textarea>
+      </label>
+
+      <label>
+        Job change message
+        <textarea id="jobChangeMessage" rows="3"></textarea>
+      </label>
+
+      <div class="buttons">
+        <button id="save">Save</button>
+        <button id="reset" class="secondary">Reset defaults</button>
+      </div>
+
+      <div id="saved" class="saved"></div>
+    </div>
+
+    <script src="options.js"></script>
+  </body>
+</html>

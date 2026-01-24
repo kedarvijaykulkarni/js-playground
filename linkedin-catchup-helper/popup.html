@@ -1,0 +1,37 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Catch-up Helper</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <div class="wrap">
+      <h1>Catch-up Helper</h1>
+      <p class="hint">
+        Opens + drafts messages, but you click <b>Send</b>.
+      </p>
+
+      <div class="status" id="status">Checking tab…</div>
+
+      <div class="buttons">
+        <button id="btnBirthdays">Prepare Birthdays</button>
+        <button id="btnWork">Prepare Work Anniversaries</button>
+        <button id="btnJobs">Prepare Job Changes</button>
+      </div>
+
+      <div class="buttons">
+        <button class="secondary" id="btnClose">Close Message Overlay</button>
+        <button class="danger" id="btnStop">Stop</button>
+      </div>
+
+      <div class="row">
+        <a href="options.html" target="_blank">Settings</a>
+      </div>
+
+      <pre id="log" class="log"></pre>
+    </div>
+
+    <script src="popup.js"></script>
+  </body>
+</html>
