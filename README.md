@@ -67,3 +67,35 @@ https://www.youtube.com/watch?v=jZW4W02iRBA
 Generate Blog Sections
 
 Challenges facing new startup
+
+
+
+create virtual environment
+```shell
+python -m venv venv
+```
+
+activate
+```shell
+venv\Scripts\activate
+```
+
+install requirement
+```shell
+pip install -r requirements.txt
+```
+
+need to run following command
+```shell
+playwright install
+```
+
+```shell
+$env:LINKEDIN_EMAIL="your_email@example.com"
+$env:LINKEDIN_PASSWORD="your_password_here"
+```
+
+To Run
+```shell
+python linkedin_birthday_bot.py
+```
