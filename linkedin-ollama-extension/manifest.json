@@ -1,0 +1,15 @@
+{
+  "manifest_version": 3,
+  "name": "LinkedIn Post Writer (Ollama)",
+  "version": "1.0.1",
+  "description": "Generate a LinkedIn post via local Ollama and insert it into the LinkedIn composer.",
+  "permissions": ["activeTab", "scripting", "tabs"],
+  "host_permissions": [
+    "https://*.linkedin.com/*",
+    "http://localhost:11434/*"
+  ],
+  "action": {
+    "default_title": "LinkedIn Ollama Writer",
+    "default_popup": "popup.html"
+  }
+}
