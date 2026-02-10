@@ -1,5 +1,5 @@
 # LinkedIn Bot with Ollama
-Examples created with MantiumAI JavaScript client library for the integration with LinkedIn platforms.
+Examples created with Ollama LLM API for the integration with LinkedIn platforms.
 ## Prerequisites
 
 You will need the following things properly installed on your computer.
@@ -8,12 +8,6 @@ You will need the following things properly installed on your computer.
 - [Node.js](https://nodejs.org/)
 - [Yarn](https://yarnpkg.com/)
 
-## Installation
-
-- `git clone git@github.com:mantiumai/js-playground.git` this repository
-- `cd js-playground`
-- `git fetch origin LinkedIn-Bot && git checkout LinkedIn-Bot`
-- `npm install`
 
 ## Running / Development
 
