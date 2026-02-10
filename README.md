@@ -1,4 +1,4 @@
-# LinkedIn Bot by MantiumAI
+# LinkedIn Bot with Ollama
 Examples created with MantiumAI JavaScript client library for the integration with LinkedIn platforms.
 ## Prerequisites
 
