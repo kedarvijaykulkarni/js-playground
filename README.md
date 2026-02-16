@@ -93,3 +93,6 @@ To Run
 ```shell
 python linkedin_birthday_bot.py
 ```
+
+
+check schedule posts: https://www.linkedin.com/feed/?shareActive=true&view=management

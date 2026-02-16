@@ -324,8 +324,50 @@ def send_job_change_messages(page):
         except Exception as e:
             print(f"[{i+1}/{total}] ⚠️ Error: {e}")
             close_message_overlay(page)
-
     print(f"\n✅ Job changes done. Messages sent: {sent}")
+
+
+def scroll_to_bottom_with_infinite_load(page):
+    """
+    Refined: Scrolls down the WHOLE page using 'End' key to trigger 'load more'.
+    Ignores <main> and targets the global window/body.
+    Waits 3-5 seconds after each load as requested.
+    """
+    print("\n📜 Scrolling WHOLE page to load more elements...")
+    
+    while True:
+        # Count nurture cards before scrolling
+        current_cards = page.locator('div[data-view-name="nurture-card"]').count()
+        
+        # 1. Use the 'End' key – more reliable for triggering some scroll events
+        page.keyboard.press("End")
+        page.wait_for_timeout(1000)
+        
+        # 2. Add a small 'wiggle' (Scroll up 100px then Down again)
+        # This can help trigger lazy-loaders that watch for scroll direction changes
+        page.evaluate("window.scrollBy(0, -200)")
+        page.wait_for_timeout(500)
+        page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
+        
+        # 3. Wait for content to load (3-5 seconds as requested)
+        wait_time = 4000  # 4 seconds
+        page.wait_for_timeout(wait_time)
+        
+        new_cards = page.locator('div[data-view-name="nurture-card"]').count()
+        
+        if new_cards > current_cards:
+            print(f"✨ Loaded more cards! (Total: {new_cards})")
+            continue  # Keep scrolling if more loaded
+        else:
+            # Final verification: One last 'End' press
+            page.keyboard.press("End")
+            page.wait_for_timeout(2000)
+            final_cards = page.locator('div[data-view-name="nurture-card"]').count()
+            if final_cards > new_cards:
+                continue
+            
+            print("🏁 No more new elements found.")
+            break
 
 
 def run():
@@ -348,16 +390,19 @@ def run():
         # ===== Birthdays =====
         page.goto(BIRTHDAY_URL, wait_until="domcontentloaded")
         page.wait_for_timeout(WAIT_BETWEEN_ACTIONS_MS)
+        scroll_to_bottom_with_infinite_load(page)
         send_birthday_messages(page)
 
         # ===== Work anniversaries =====
         page.goto(WORK_ANNIV_URL, wait_until="domcontentloaded")
         page.wait_for_timeout(WAIT_BETWEEN_ACTIONS_MS)
+        scroll_to_bottom_with_infinite_load(page)
         send_work_anniversary_messages(page)
 
         # ===== Job changes =====
         page.goto(JOB_CHANGES_URL, wait_until="domcontentloaded")
         page.wait_for_timeout(WAIT_BETWEEN_ACTIONS_MS)
+        scroll_to_bottom_with_infinite_load(page)
         send_job_change_messages(page)
 
         context.close()

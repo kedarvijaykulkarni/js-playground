@@ -7,6 +7,7 @@ import fs from "fs";
 // const prompt_id = process.env.MANTIUM_LINKEDIN_PROMPT_ID;
 const client_id = process.env.LINKEDIN_CLIENTID;
 const client_secret = process.env.LINKEDIN_CLIENT_SECRET;
+const client_ollam_model = process.env.OLLAMA_MODEL || "deepseek-r1:14b";
 // const credentials = {
 //   username: process.env.MANTIUM_USER_NAME,
 //   password: process.env.MANTIUM_PASSWORD,
@@ -50,8 +51,8 @@ export async function getAnswer(question) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "deepseek-r1",
-        prompt: `Act as a senior LinkedIn professional article writer.\n
+        model: client_ollam_model,
+        prompt: `Act as an expert content writer and as a senior LinkedIn professional article writer.\n
 
               Write a high-impact LinkedIn post on the given topic with the following constraints:\n
 
@@ -59,6 +60,8 @@ export async function getAnswer(question) {
               • Use line breaks for structure (short paragraphs, 1-3 lines max)\n
               • No markdown, no bullet symbols, no headings, no emojis\n
               • Optimize for LinkedIn feed readability and mobile viewing\n
+              • Write for mid-career professionals in tech.\n
+              • Focus on actionable takeaways and conversational tone.\n
               • Apply LinkedIn truncation logic: hook within first 2 lines, strong early framing\n
               • Tone: authoritative, insightful, business-focused, and conversational\n
               • Audience: founders, operators, product leaders, and senior professionals\n
@@ -90,6 +93,39 @@ export async function getAnswer(question) {
   }
 }
 
+export async function getHashtags(postContent) {
+  try {
+    if (!postContent) {
+      return { response: "" };
+    }
+
+    const response = await fetch("http://localhost:11434/api/generate", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: client_ollam_model,
+        prompt: `Generate 5-10 relevant, high-traffic LinkedIn hashtags for the following post.
+                 Output ONLY the hashtags separated by spaces. Do not include any introductory text.
+
+                 Post Content:
+                 ${postContent}`,
+        stream: false,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Ollama hashtags request failed: ${response.status}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error getting hashtags:", error);
+    return { response: "" }; // Return empty if fails so main flow continues
+  }
+}
+
 // apiKey = null;
 
 export async function postMessage(req, res) {
@@ -102,9 +138,19 @@ export async function postMessage(req, res) {
       .json({ error: "Failed to get response from Ollama" });
   }
 
+  // Generate hashtags
+  let hashtagsData = { response: "" };
+  try {
+    if (data?.response) {
+      hashtagsData = await getHashtags(data.response);
+    }
+  } catch (error) {
+    console.error("Failed to generate hashtags", error);
+  }
+
   const payload = {
     input: req.body.pinput,
-    response: data?.response || "",
+    response: (data?.response || "") + (hashtagsData?.response ? "\n\n" + hashtagsData.response : ""),
   };
 
   fs.writeFile("./blogtext.json", JSON.stringify(payload), function (err) {
@@ -152,15 +198,16 @@ export function editPage(req, res) {
       <div class="field">
         <label for="input">Title / Topic</label>
         <input id="input" name="input" value="${escapeHtml(
-          blogText.input || ""
+          blogText.input || "",
         )}" />
       </div>
       <div class="field">
         <label for="response">Post Text</label>
         <textarea id="response" name="response">${escapeHtml(
-          blogText.response || ""
+          blogText.response || "",
         )}</textarea>
       </div>
+
       <button type="submit">Post to LinkedIn</button>
     </form>
   </body>
@@ -210,7 +257,7 @@ export async function auth(req, res) {
         method: "POST",
         headers: config.headers,
         body: new URLSearchParams(data).toString(),
-      }
+      },
     );
     if (!tokenResponse.ok) {
       throw new Error(`LinkedIn token request failed: ${tokenResponse.status}`);
@@ -230,11 +277,11 @@ export async function auth(req, res) {
           headers: {
             Authorization: `Bearer ${response.access_token}`,
           },
-        }
+        },
       );
       if (!meResponse.ok) {
         throw new Error(
-          `LinkedIn profile request failed: ${meResponse.status}`
+          `LinkedIn profile request failed: ${meResponse.status}`,
         );
       }
       meRes = await meResponse.json();
@@ -253,7 +300,7 @@ export async function auth(req, res) {
       });
       if (!meResponse.ok) {
         throw new Error(
-          `LinkedIn profile request failed: ${meResponse.status}`
+          `LinkedIn profile request failed: ${meResponse.status}`,
         );
       }
       meRes = await meResponse.json();
@@ -275,10 +322,10 @@ export async function auth(req, res) {
       console.log(err);
     }
 
-    const shareText =
-      // (blogText.input ? blogText.input + "\n" : "") +
-      blogText.response +
-      "\n\nContent generated by (non-human) AI language model.\n";
+    const shareText = blogText.response;
+    // (blogText.input ? blogText.input + "\n" : "") +
+    // blogText.response +
+    // "\n\nContent generated by (non-human) AI language model.\n";
     const maxShareLength = 3000;
     const safeShareText =
       shareText.length > maxShareLength
@@ -324,6 +371,7 @@ export async function auth(req, res) {
           `LinkedIn share failed: ${postResponse.status} ${errorText}`
         );
       }
+      console.log("Posted successfully to LinkedIn!");
     } catch (err) {
       console.error("err ::", err);
     }
