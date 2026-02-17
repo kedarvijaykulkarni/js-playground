@@ -11,6 +11,9 @@ PROFILE_DIR = "pw_linkedin_profile"
 # ===== GLOBAL CONFIG =====
 MESSAGE_TEXT = "Wishing you a very happy birthday! 🎉"
 MAX_MESSAGES_PER_RUN = 20
+# How many times to continue scrolling after new cards are detected.
+# Set to 1 for a single extra load; increase to check more times.
+MAX_SCROLL_LOADS = 1
 
 # Work anniversary message template (we will fill {years})
 WORK_ANNIV_TEMPLATE = "Congrats on your {years} year work anniversary! 🎉"
@@ -127,13 +130,80 @@ def close_message_overlay(page):
         pass
 
 
+def _get_nurture_cards(page):
+    """
+    Returns a locator for nurture cards. LinkedIn rotates HTML frequently,
+    so we keep a stable primary selector and a fallback for SDUI list items.
+    """
+    cards = page.locator('div[data-view-name="nurture-card"]')
+    if cards.count() > 0:
+        return cards
+
+    # Fallback: SDUI list items that contain the primary message CTA
+    cta_selector = (
+        'button[data-view-name="nurture-card-primary-button"], '
+        'a[data-view-name="nurture-card-primary-button"], '
+        'button[aria-label^="Message "], '
+        'a[aria-label^="Message "]'
+    )
+    return page.locator('div[role="listitem"]', has=page.locator(cta_selector))
+
+
+def _click_load_more_if_present(page) -> bool:
+    try:
+        load_more = page.locator('button:has-text("Load more")').first
+        if load_more.count() == 0:
+            return False
+        try:
+            load_more.scroll_into_view_if_needed(timeout=2000)
+        except Exception:
+            pass
+        if not load_more.is_visible(timeout=1000):
+            return False
+        load_more.click(timeout=2000)
+        return True
+    except Exception:
+        return False
+
+
+def _find_message_button(card):
+    selectors = [
+        'button[data-view-name="nurture-card-primary-button"]',
+        'button[aria-label^="Message "]',
+        'button:has(svg[id="send-privately-small"])',
+    ]
+    for sel in selectors:
+        loc = card.locator(sel).first
+        if loc.count() > 0:
+            return loc
+    return None
+
+
+def _find_message_cta(card):
+    # Prefer real button CTA (new SDUI layout); fallback to anchor for legacy layouts.
+    btn = _find_message_button(card)
+    if btn:
+        return btn
+
+    selectors = [
+        'a[data-view-name="nurture-card-primary-button"]',
+        'a[aria-label^="Message "]',
+        'a:has(svg[id="send-privately-small"])',
+    ]
+    for sel in selectors:
+        loc = card.locator(sel).first
+        if loc.count() > 0:
+            return loc
+    return None
+
+
 def _open_message_overlay_from_card(card) -> bool:
     """
     Clicks the 'Message' CTA inside a nurture-card.
     Returns True if clicked, False otherwise.
     """
-    msg_link = card.locator('a[data-view-name="nurture-card-primary-button"]').first
-    if msg_link.count() == 0:
+    msg_link = _find_message_cta(card)
+    if not msg_link:
         return False
 
     try:
@@ -171,10 +241,12 @@ def _type_send_wait_then_close(page, message_text: str):
 
 
 def send_birthday_messages(page):
-    today_cards = page.locator(
-        'div[data-view-name="nurture-card"]',
-        has=page.locator("strong", has_text="today"),
+    cards = _get_nurture_cards(page)
+    today_cards = cards.filter(
+        has=page.locator("strong", has_text=re.compile(r"\bbirthday\b", re.I))
     )
+    if today_cards.count() == 0:
+        today_cards = cards.filter(has_text=re.compile(r"\bbirthday\b", re.I))
 
     total = today_cards.count()
     print(f"\n🎂 Found {total} birthday card(s) with 'today'.")
@@ -229,7 +301,7 @@ def _extract_years_from_card(card) -> int | None:
 
 
 def send_work_anniversary_messages(page):
-    cards = page.locator('div[data-view-name="nurture-card"]')
+    cards = _get_nurture_cards(page)
     total = cards.count()
     print(f"\n🏆 Found {total} work anniversary card(s).")
 
@@ -290,7 +362,7 @@ def _is_job_change_card(card) -> bool:
 
 
 def send_job_change_messages(page):
-    cards = page.locator('div[data-view-name="nurture-card"]')
+    cards = _get_nurture_cards(page)
     total = cards.count()
     print(f"\n🧑‍💼 Found {total} job change card(s).")
 
@@ -334,38 +406,60 @@ def scroll_to_bottom_with_infinite_load(page):
     Waits 3-5 seconds after each load as requested.
     """
     print("\n📜 Scrolling WHOLE page to load more elements...")
-    
+
+    load_cycles = 0
     while True:
         # Count nurture cards before scrolling
-        current_cards = page.locator('div[data-view-name="nurture-card"]').count()
-        
-        # 1. Use the 'End' key – more reliable for triggering some scroll events
-        page.keyboard.press("End")
-        page.wait_for_timeout(1000)
-        
-        # 2. Add a small 'wiggle' (Scroll up 100px then Down again)
-        # This can help trigger lazy-loaders that watch for scroll direction changes
-        page.evaluate("window.scrollBy(0, -200)")
-        page.wait_for_timeout(500)
-        page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
-        
+        current_cards = _get_nurture_cards(page).count()
+
+        # Attempt to scroll SDUI lazy column if present
+        scrolled_container = False
+        try:
+            lazy_column = page.locator('div[data-testid="lazy-column"]').first
+            if lazy_column.count() > 0:
+                handle = lazy_column.element_handle()
+                if handle:
+                    page.evaluate("(el) => el.scrollTo(0, el.scrollHeight)", handle)
+                    scrolled_container = True
+        except Exception:
+            scrolled_container = False
+
+        if not scrolled_container:
+            # 1. Use the 'End' key – more reliable for triggering some scroll events
+            page.keyboard.press("End")
+            page.wait_for_timeout(1000)
+
+            # 2. Add a small 'wiggle' (Scroll up 100px then Down again)
+            # This can help trigger lazy-loaders that watch for scroll direction changes
+            page.evaluate("window.scrollBy(0, -200)")
+            page.wait_for_timeout(500)
+            page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
+
+        # 2.5. Click "Load more" if it appears
+        if _click_load_more_if_present(page):
+            page.wait_for_timeout(1500)
+
         # 3. Wait for content to load (3-5 seconds as requested)
         wait_time = 4000  # 4 seconds
         page.wait_for_timeout(wait_time)
-        
-        new_cards = page.locator('div[data-view-name="nurture-card"]').count()
-        
+
+        new_cards = _get_nurture_cards(page).count()
+
         if new_cards > current_cards:
+            load_cycles += 1
             print(f"✨ Loaded more cards! (Total: {new_cards})")
+            if load_cycles >= MAX_SCROLL_LOADS:
+                print(f"Scroll limit reached ({MAX_SCROLL_LOADS}).")
+                break
             continue  # Keep scrolling if more loaded
         else:
             # Final verification: One last 'End' press
             page.keyboard.press("End")
             page.wait_for_timeout(2000)
-            final_cards = page.locator('div[data-view-name="nurture-card"]').count()
+            final_cards = _get_nurture_cards(page).count()
             if final_cards > new_cards:
                 continue
-            
+
             print("🏁 No more new elements found.")
             break
 
