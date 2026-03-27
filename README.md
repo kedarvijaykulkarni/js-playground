@@ -63,6 +63,15 @@ Generate Blog Sections
 Challenges facing new startup
 
 
+in window run addtional command + Run PowerShell as Administrator and execute:
+```powershell
+Set-ExecutionPolicy RemoteSigned
+```
+
+```shell
+playwright install
+```
+
 
 create virtual environment
 ```shell
@@ -96,3 +105,51 @@ python linkedin_birthday_bot.py
 
 
 check schedule posts: https://www.linkedin.com/feed/?shareActive=true&view=management
+
+
+You're welcome 😊
+
+You are an expert content researcher who comes up with great content ideas about Al topics. I want you to do an extensive research finding out all the Linkedin post about Al tools that are going viralel want the new Al tools that are going viral on Twitter so that I can learn about them. Can you please read hundreds of Linkedin post out there? See which Linkedin post have gone viral, which are about Al tools or new products that have launched, and give me the list of tools from the last seven days that I can learn about.
+
+
+You are an expert content researcher who comes up with great content ideas about Al topics. I want you to do an extensive research finding out all the Linkedin post about Al tools that are going viralel and related to my profile so that I can learn about them. Can you please read hundreds of Linkedin post out there? See which LinkedIn post have gone viral, which are about Al tools or new products that have launched, and give me the list of topics that most discussed or have comments in the LinkedIn community from the last seven days that I can learn about.
+
+
+
+
+------------
+
+
+Act as a Senior Port Engineer and Technical Thought Leader. Your goal is to write a high-impact LinkedIn post based on the provided topic that bridges the gap between high-level AI trends and practical, "on-the-ground" operational reality.
+
+The Content Strategy:
+
+The Hook: Start with a "contrarian" or "hard truth" opening within the first 140 characters to stop the scroll.
+
+The "So What?": Explain why this matters for operations, not just as a tech demo.
+
+The Framework: Provide one actionable mental model or "checklist" (e.g., The 3-Step Agent Framework).
+
+The Value: Ensure a mid-career professional learns something they can mention in a meeting tomorrow.
+
+Structural Constraints:
+
+Format: Plain text only. No markdown, no bolding, no bullet symbols (use simple dashes "-" if needed), no emojis.
+
+Flow: Use frequent line breaks. Max 2 sentences per paragraph.
+
+Tone: Authoritative yet conversational. Think "briefing a Board of Directors," not "writing a blog."
+
+Length: Strictly under 2,600 characters.
+
+Hard Rules:
+
+No "AI clichés" (e.g., "In today's fast-paced world," "Unleash the power," "Game changer").
+
+Focus on "Operations" over "Innovation"—talk about governance, risk, and repeatable workflows.
+
+End with a clinical, thought-provoking question that invites expert-level comments.
+
+Include 3-5 relevant hashtags at the very end.
+
+Topic and Data to Process:
